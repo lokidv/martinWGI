@@ -7,8 +7,14 @@ echo "using $PORT"
 # Update package list and install WireGuard, Node.js, and necessary dependencies
 echo "Installing required packages..."
 sudo apt update
-sudo apt install -y wireguard curl nodejs git
-npm install -g pm2
+sudo apt install -y wireguard curl git
+
+curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
+sudo bash /tmp/nodesource_setup.sh
+sudo apt-get install -y nodejs
+
+node -v
+npm -v
 
 # Enable IPv4 forwarding for WireGuard
 echo "Enabling IPv4 forwarding..."
