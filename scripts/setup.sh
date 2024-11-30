@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Prompt the user for the port number if not passed as an argument
-echo Enter the port number for the Node.js application to listen on:
-read -p PORT
-echo using $PORT 
+echo "Enter the port number for the Node.js application to listen on:"
+read PORT
+echo "using $PORT"
 
 # Update package list and install WireGuard, Node.js, and necessary dependencies
 echo "Installing required packages..."
