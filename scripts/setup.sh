@@ -16,7 +16,7 @@ sudo apt-get install -y nodejs
 node -v
 npm -v
 
-npm install pm2 -g
+sudo npm install pm2 -g
 
 # Enable IPv4 forwarding for WireGuard
 echo "Enabling IPv4 forwarding..."
