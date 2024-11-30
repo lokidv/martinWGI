@@ -9,7 +9,7 @@ echo "Installing required packages..."
 sudo apt update
 sudo apt install -y wireguard curl git
 
-curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
+curl -sL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh
 sudo bash /tmp/nodesource_setup.sh
 sudo apt-get install -y nodejs
 
