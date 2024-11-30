@@ -1,12 +1,17 @@
 #!/bin/bash
 
-# Prompt for the port number to run the Node.js app
-read -p "Enter the port number for the Node.js application to listen on: " PORT
-
-# Validate the port number
-if ! [[ "$PORT" =~ ^[0-9]+$ ]] || [ "$PORT" -lt 1 ] || [ "$PORT" -gt 65535 ]; then
-  echo "Invalid port number. Please enter a number between 1 and 65535."
-  exit 1
+# Prompt the user for the port number if not passed as an argument
+if [ -z "$PORT" ]; then
+  # Prompt user just like sudo asks for password
+  while true; do
+    read -p "Enter the port number for the Node.js application to listen on: " PORT
+    # Validate the port number is within the correct range
+    if [[ "$PORT" =~ ^[0-9]+$ ]] && [ "$PORT" -ge 1 ] && [ "$PORT" -le 65535 ]; then
+      break
+    else
+      echo "Invalid port number. Please enter a number between 1 and 65535."
+    fi
+  done
 fi
 
 # Update package list and install WireGuard, Node.js, and necessary dependencies
