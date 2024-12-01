@@ -10,8 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sequelize/sqlite3": "^7.0.0-alpha.43",
     "body-parser": "^1.20.3",
     "express": "^4.21.1",
+    "sequelize": "^6.37.5",
     "sqlite3": "^5.1.7",
     "wireguard-tools": "^0.1.0"
   }
