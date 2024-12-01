@@ -42,22 +42,19 @@ router.get("/configs/:username", async (req, res) => {
 
   // Generate the WireGuard configuration content
   const configContent = `[Interface]
-  PrivateKey = ${config.private_key}
-  Address = ${config.allowed_ip}/32
-  DNS = 1.1.1.1,1.0.0.1
-  MTU = 1340
+PrivateKey = ${config.private_key}
+Address = ${config.allowed_ip}/32
+DNS = 1.1.1.1,1.0.0.1
+MTU = 1340
 
-  [Peer]
-  PublicKey = ${config.public_key}
-  PresharedKey = ${config.preshared_key}
-  Endpoint = ${publicIp}:${port}
-  AllowedIPs = 0.0.0.0/0`;
+[Peer]
+PublicKey = ${config.public_key}
+PresharedKey = ${config.preshared_key}
+Endpoint = ${publicIp}:${port}
+AllowedIPs = 0.0.0.0/0`;
 
-  // Set headers to prompt a file download
   res.setHeader("Content-Disposition", `attachment; filename=${username}.conf`);
   res.setHeader("Content-Type", "text/plain");
-
-  // Send the configuration content
   res.send(configContent);
 });
 
