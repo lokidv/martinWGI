@@ -4,7 +4,7 @@ const Config = require("./models/config");
 const router = express.Router();
 
 const { assignIpAddress, getPublicIp } = require("./utils/ip");
-const { updateConfigFile } = require("./utils/config-file");
+const { updateConfigFile, getPortFromConfig } = require("./utils/config-file");
 
 router.post("/configs", async (req, res) => {
   const { username } = req.body;
