@@ -14,6 +14,14 @@ async function bootstrap() {
   }
 
   app.use("/api", apis);
+
+  // Ensure the server starts listening
+  app.listen(process.env.PORT || 3000, () => {
+    console.log("Server is running");
+  });
 }
 
 bootstrap();
+process.on("unhandledRejection", (error) => {
+  console.error("Unhandled promise rejection:", error);
+});
