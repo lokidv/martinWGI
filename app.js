@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const app = express();
 const port = process.env.PORT || 3000;
-import { WgConfig } from "wireguard-tools";
+const { WgConfig } = require("wireguard-tools");
 
 app.use(express.json());
 
@@ -53,7 +53,7 @@ app.post("/api/configs", async (req, res) => {
   }
 
   // Generate keys
-  const { privateKey, publicKey } = await server.generateKeys({
+  await server.generateKeys({
     preSharedKey: true,
   });
 
