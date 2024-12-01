@@ -5,11 +5,18 @@ const fs = require("fs");
 const path = require("path");
 const app = express();
 const port = process.env.PORT || 3000;
+import { WgConfig } from "wireguard-tools";
 
 app.use(express.json());
 
 // Connect to SQLite database
-const db = new sqlite3.Database("./data/database.sqlite3");
+const dbFile = path.join(__dirname, "data", "database.sqlite3");
+const db = new sqlite3.Database(dbFile);
+
+const serverConfig = "etc/wireguard/wg0.conf";
+const server = new WgConfig({
+  serverConfig,
+});
 
 // Utility function to check if an IP address is already in use (ping test)
 function isIpAvailable(ip) {
@@ -37,42 +44,6 @@ async function getAvailableIp(start = 2, end = 254) {
   throw new Error("No available IPs in the range");
 }
 
-// Generate WireGuard server configuration
-function generateServerConfig() {
-  return `
-[Interface]
-Address = 10.66.66.1/24
-ListenPort = 12345
-PrivateKey = QKvZXuVexhPLLqGQsOrZiPauK/iVc3bSLwxmaJ4Srng=
-PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
-  `;
-}
-
-// Generate client WireGuard config
-function generateClientConfig(username, privateKey, publicKey, allowedIp) {
-  return `
-[Interface]
-PrivateKey = ${privateKey}
-Address = ${allowedIp}/32
-
-[Peer]
-PublicKey = ${publicKey}
-Endpoint = 130.185.76.232:12345
-AllowedIPs = 0.0.0.0/0
-PersistentKeepalive = 25
-  `;
-}
-
-// Utility function to generate WireGuard keys using `wg` command-line tool
-function generateWireGuardKeys() {
-  const privateKey = execSync("wg genkey").toString().trim();
-  const publicKey = execSync(`echo "${privateKey}" | wg pubkey`)
-    .toString()
-    .trim();
-  return { privateKey, publicKey };
-}
-
 // POST /api/configs - Create a new WireGuard configuration
 app.post("/api/configs", async (req, res) => {
   const { username } = req.body;
@@ -82,7 +53,9 @@ app.post("/api/configs", async (req, res) => {
   }
 
   // Generate keys
-  const { privateKey, publicKey } = generateWireGuardKeys();
+  const { privateKey, publicKey } = await server.generateKeys({
+    preSharedKey: true,
+  });
 
   // Get an available IP for the new user
   let allowedIp;
@@ -93,23 +66,31 @@ app.post("/api/configs", async (req, res) => {
     return res.status(400).send({ message: "No available IPs in the range" });
   }
 
-  // Insert new configuration into the database
-  const query = `INSERT INTO configs (username, public_key, private_key, allowed_ip) VALUES (?, ?, ?, ?)`;
-  db.run(query, [username, publicKey, privateKey, allowedIp], function (err) {
-    if (err) {
-      return res
-        .status(500)
-        .send({ message: "Error creating configuration", error: err });
-    }
-    res.status(201).send({
-      message: "Configuration created",
-      id: this.lastID,
-      username,
-      publicKey,
-      privateKey,
-      allowedIp,
-    });
+  const serverAsPeer = server.createPeer({
+    allowedIps: [allowedIp],
+    preSharedKey: server.preSharedKey,
   });
+
+  console.log(serverAsPeer);
+  res.send();
+
+  // Insert new configuration into the database
+  // const query = `INSERT INTO configs (username, public_key, private_key, allowed_ip) VALUES (?, ?, ?, ?)`;
+  // db.run(query, [username, publicKey, privateKey, allowedIp], function (err) {
+  //   if (err) {
+  //     return res
+  //       .status(500)
+  //       .send({ message: "Error creating configuration", error: err });
+  //   }
+  //   res.status(201).send({
+  //     message: "Configuration created",
+  //     id: this.lastID,
+  //     username,
+  //     publicKey,
+  //     privateKey,
+  //     allowedIp,
+  //   });
+  // });
 });
 
 // GET /api/configs - Get all WireGuard configurations
