@@ -14,12 +14,13 @@ router.post("/configs", async (req, res) => {
   }
 
   const allowed_ip = await assignIpAddress();
-  const { privateKey, publicKey } = await generateWireGuardKeys();
+  const { privateKey, publicKey, presharedKey } = await generateWireGuardKeys();
 
   const newConfig = await Config.create({
     username,
     private_key: privateKey,
     public_key: publicKey,
+    preshared_key: presharedKey,
     allowed_ip,
   });
 
