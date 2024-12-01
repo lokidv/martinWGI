@@ -4,6 +4,7 @@ const { sequelize } = require("./database");
 
 async function bootstrap() {
   const app = express();
+  app.use(express.json());
 
   try {
     await sequelize.authenticate();
