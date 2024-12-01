@@ -1,4 +1,5 @@
 const Config = require("../models/config");
+const { execSync } = require("child_process");
 
 async function assignIpAddress() {
   // Retrieve all assigned IP addresses
