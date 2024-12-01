@@ -9,7 +9,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 // Connect to SQLite database
-const db = new sqlite3.Database("./wireguard-configs.db");
+const db = new sqlite3.Database("./data/database.sqlite3");
 
 // Utility function to check if an IP address is already in use (ping test)
 function isIpAvailable(ip) {
@@ -43,7 +43,7 @@ function generateServerConfig() {
 [Interface]
 Address = 10.66.66.1/24
 ListenPort = 12345
-PrivateKey = <server_private_key>
+PrivateKey = QKvZXuVexhPLLqGQsOrZiPauK/iVc3bSLwxmaJ4Srng=
 PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
   `;
@@ -58,7 +58,7 @@ Address = ${allowedIp}/32
 
 [Peer]
 PublicKey = ${publicKey}
-Endpoint = <server_ip>:12345
+Endpoint = 130.185.76.232:12345
 AllowedIPs = 0.0.0.0/0
 PersistentKeepalive = 25
   `;
