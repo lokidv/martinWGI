@@ -40,19 +40,19 @@ router.get("/configs/:username", async (req, res) => {
   const config = await Config.findOne({ where: { username } });
   const publicIp = getPublicIp(); // Get public IP using local network interface
   const port = getPortFromConfig(); // Extract port from wg0.conf
-  const privateKey = fs.readFileSync("/etc/wireguard/public.key", "utf8");
+  const serverPublicKey = fs.readFileSync("/etc/wireguard/public.key", "utf8");
 
   // Generate the WireGuard configuration content
   const configContent = `[Interface]
-PrivateKey = ${privateKey}
+PrivateKey = ${config.private_key}
 Address = ${config.allowed_ip}/24
 DNS = 1.1.1.1,1.0.0.1
 MTU = 1340
 
 [Peer]
-PublicKey = ${config.public_key}
+PublicKey = ${serverPublicKey}
 Endpoint = ${publicIp}:${port}
-AllowedIPs = 0.0.0.0`;
+AllowedIPs = 0.0.0.0/0, ::/0`;
 
   res.setHeader(
     "Content-Disposition",
