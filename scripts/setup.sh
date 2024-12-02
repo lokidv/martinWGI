@@ -15,9 +15,6 @@ curl -sL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh
 sudo bash /tmp/nodesource_setup.sh
 sudo apt-get install -y nodejs
 
-node -v
-npm -v
-
 sudo npm install pm2 -g
 
 # Enable IPv4 forwarding for WireGuard

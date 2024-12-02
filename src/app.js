@@ -1,6 +1,7 @@
 const express = require("express");
 const apis = require("./api");
 const { sequelize } = require("./database");
+const { updateConfigFile } = require("./utils/config-file");
 
 async function bootstrap() {
   const app = express();
@@ -14,6 +15,7 @@ async function bootstrap() {
     console.error("Unable to connect to the database:", error);
   }
 
+  await updateConfigFile();
   app.use("/api", apis);
 
   // Ensure the server starts listening
