@@ -40,7 +40,7 @@ router.get("/configs/:username", async (req, res) => {
   const config = await Config.findOne({ where: { username } });
   const publicIp = getPublicIp(); // Get public IP using local network interface
   const port = getPortFromConfig(); // Extract port from wg0.conf
-  const privateKey = fs.readFileSync("/etc/wireguard/private.key", "utf8");
+  const privateKey = fs.readFileSync("/etc/wireguard/public.key", "utf8");
 
   // Generate the WireGuard configuration content
   const configContent = `[Interface]
