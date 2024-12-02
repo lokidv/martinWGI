@@ -1,16 +1,18 @@
 const fs = require("fs");
 const Config = require("../models/config");
 const { exec } = require("child_process");
-const { getNetworkInterface } = require("./ip");
+const { getNetworkInterface, getPublicIp } = require("./ip");
 
 async function updateConfigFile() {
   try {
+    const privateKey = fs.readFileSync("/etc/wireguard/private.key", "utf8");
     const networkInterface = getNetworkInterface();
+    const ip = getPublicIp();
     const configPath = "/etc/wireguard/wg0.conf";
     const baseInterface = `[Interface]
 Address = 10.66.66.1/24
 ListenPort = 12345
-PrivateKey = QKvZXuVexhPLLqGQsOrZiPauK/iVc3bSLwxmaJ4Srng=
+PrivateKey = ${privateKey}
 PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o ${
       networkInterface || "eth0"
     } -j MASQUERADE
@@ -25,8 +27,15 @@ PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACC
       const newConfig = `### Client ${config.username}_${config.id}
 [Peer]
 PublicKey = ${config.public_key}
-AllowedIPs = ${config.allowed_ip}`;
+AllowedIPs = ${config.allowed_ip}
+Endpoint = ${ip}:12345`;
       newConfigs.push(newConfig);
+      // await new Promise((resolve, reject) => {
+      //   exec(
+      //     `sudo wg set wg0 peer ${config.public_key} allowed-ips ${config.allowed_ip}`,
+      //     () => resolve()
+      //   );
+      // });
     }
 
     const configContent = [baseInterface, ...newConfigs].join("\n");

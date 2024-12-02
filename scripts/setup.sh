@@ -17,6 +17,10 @@ sudo apt-get install -y nodejs
 
 sudo npm install pm2 -g
 
+wg genkey | sudo tee /etc/wireguard/private.key
+sudo chmod go= /etc/wireguard/private.key
+sudo cat /etc/wireguard/private.key | wg pubkey | sudo tee /etc/wireguard/public.key
+
 # Enable IPv4 forwarding for WireGuard
 echo "Enabling IPv4 forwarding..."
 echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
