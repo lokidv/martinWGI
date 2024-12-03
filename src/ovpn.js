@@ -292,15 +292,24 @@ app.get("/getClientConfig/:clientName", (req, res) => {
     return res.status(404).json({ error: "Client configuration not found." });
   }
 
-  // Security Note: Ensure that proper authentication is implemented to prevent unauthorized access
+  // Read the client configuration file
+  let configContent;
+  try {
+    configContent = fs.readFileSync(clientConfigPath, "utf8");
+  } catch (error) {
+    console.error("Error reading client configuration:", error.message);
+    return res
+      .status(500)
+      .json({ error: "Error reading client configuration" });
+  }
 
-  // Send the file as a download
-  res.download(clientConfigPath, `${clientName}.ovpn`, (err) => {
-    if (err) {
-      console.error("Error sending client configuration:", err.message);
-      res.status(500).json({ error: "Error sending client configuration" });
-    }
-  });
+  // Set the response headers as per your requirement
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename=${clientName}.ovpn`
+  );
+  res.setHeader("Content-Type", "text/plain");
+  res.send(configContent);
 });
 
 module.exports = app;
