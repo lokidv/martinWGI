@@ -6,6 +6,12 @@ const path = require("path");
 
 const app = express.Router();
 
+const CLIENTS_DIR = "/etc/openvpn/clients";
+
+if (!fs.existsSync(CLIENTS_DIR)) {
+  fs.mkdirSync(CLIENTS_DIR, { recursive: true });
+}
+
 function tunAvailable() {
   return fs.existsSync("/dev/net/tun");
 }
