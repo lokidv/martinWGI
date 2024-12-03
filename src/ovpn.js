@@ -125,8 +125,6 @@ function getTLSSig() {
   }
 }
 
-// API Endpoints
-
 // Add a new client
 app.post("/newClient", (req, res) => {
   const client = req.body.clientName;
