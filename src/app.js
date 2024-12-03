@@ -1,5 +1,6 @@
 const express = require("express");
 const apis = require("./api");
+const ovpn = require("./ovpn");
 const { sequelize } = require("./database");
 const { updateConfigFile } = require("./utils/config-file");
 
@@ -17,6 +18,7 @@ async function bootstrap() {
 
   await updateConfigFile();
   app.use("/api", apis);
+  app.use("/ovpn", ovpn);
 
   // Ensure the server starts listening
   app.listen(process.env.PORT || 3000, () => {
