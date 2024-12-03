@@ -124,8 +124,6 @@ function getTLSSig() {
     return null;
   }
 }
-
-// Add a new client
 app.post("/newClient", (req, res) => {
   const client = req.body.clientName;
 
@@ -170,13 +168,6 @@ app.post("/newClient", (req, res) => {
       return res
         .status(500)
         .json({ error: "Error creating client certificate" });
-    }
-
-    // Determine home directory to store the client configuration
-    let homeDir = "/root";
-
-    if (process.env.SUDO_USER && process.env.SUDO_USER !== "root") {
-      homeDir = `/home/${process.env.SUDO_USER}`;
     }
 
     const TLS_SIG = getTLSSig();
@@ -229,15 +220,11 @@ ${clientKey}
 ${tlsSigContent}
 `;
 
-      const clientConfigPath = `${homeDir}/${client}.ovpn`;
+      const clientConfigPath = path.join(CLIENTS_DIR, `${client}.ovpn`);
       fs.writeFileSync(clientConfigPath, ovpnContent);
 
       // Send the .ovpn file content as response (Base64 encoded)
-      const ovpnFileContent = fs.readFileSync(clientConfigPath, "utf8");
-      const ovpnFileBase64 = Buffer.from(ovpnFileContent).toString("base64");
-
-      // Optionally, delete the client config file from the server
-      fs.unlinkSync(clientConfigPath);
+      const ovpnFileBase64 = Buffer.from(ovpnContent).toString("base64");
 
       return res.json({
         message: `Client ${client} added.`,
@@ -257,9 +244,11 @@ app.post("/revokeClient", (req, res) => {
   const client = req.body.clientName;
 
   if (!client || !/^[a-zA-Z0-9_-]+$/.test(client)) {
-    return res.status(400).json({
-      error: "Invalid client name. Alphanumeric, underscore, dash only.",
-    });
+    return res
+      .status(400)
+      .json({
+        error: "Invalid client name. Alphanumeric, underscore, dash only.",
+      });
   }
 
   try {
@@ -272,8 +261,7 @@ app.post("/revokeClient", (req, res) => {
       "/etc/openvpn/crl.pem"
     );
     fs.chmodSync("/etc/openvpn/crl.pem", 0o644);
-    execSync(`find /home/ -maxdepth 2 -name "${client}.ovpn" -delete`);
-    execSync(`rm -f "/root/${client}.ovpn"`);
+    execSync(`find ${CLIENTS_DIR} -name "${client}.ovpn" -delete`);
     execSync(`sed -i "/^${client},.*/d" /etc/openvpn/ipp.txt`);
     execSync("cp /etc/openvpn/easy-rsa/pki/index.txt{,.bk}");
 
@@ -282,6 +270,32 @@ app.post("/revokeClient", (req, res) => {
     console.error("Error revoking client certificate:", error.message);
     return res.status(500).json({ error: "Error revoking client certificate" });
   }
+});
+
+app.get("/getClientConfig/:clientName", (req, res) => {
+  const clientName = req.params.clientName;
+
+  if (!clientName || !/^[a-zA-Z0-9_-]+$/.test(clientName)) {
+    return res.status(400).json({
+      error: "Invalid client name. Alphanumeric, underscore, dash only.",
+    });
+  }
+
+  const clientConfigPath = path.join(CLIENTS_DIR, `${clientName}.ovpn`);
+
+  if (!fs.existsSync(clientConfigPath)) {
+    return res.status(404).json({ error: "Client configuration not found." });
+  }
+
+  // Security Note: Ensure that proper authentication is implemented to prevent unauthorized access
+
+  // Send the file as a download
+  res.download(clientConfigPath, `${clientName}.ovpn`, (err) => {
+    if (err) {
+      console.error("Error sending client configuration:", err.message);
+      res.status(500).json({ error: "Error sending client configuration" });
+    }
+  });
 });
 
 module.exports = app;
