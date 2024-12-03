@@ -2,6 +2,7 @@ const express = require("express");
 
 const fs = require("fs");
 const { execSync } = require("child_process");
+const path = require("path");
 
 const app = express.Router();
 
@@ -244,11 +245,9 @@ app.post("/revokeClient", (req, res) => {
   const client = req.body.clientName;
 
   if (!client || !/^[a-zA-Z0-9_-]+$/.test(client)) {
-    return res
-      .status(400)
-      .json({
-        error: "Invalid client name. Alphanumeric, underscore, dash only.",
-      });
+    return res.status(400).json({
+      error: "Invalid client name. Alphanumeric, underscore, dash only.",
+    });
   }
 
   try {
