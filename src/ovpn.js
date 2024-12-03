@@ -268,7 +268,9 @@ app.post("/revokeClient", (req, res) => {
     fs.chmodSync("/etc/openvpn/crl.pem", 0o644);
     execSync(`find ${CLIENTS_DIR} -name "${client}.ovpn" -delete`);
     execSync(`sed -i "/^${client},.*/d" /etc/openvpn/ipp.txt`);
-    execSync("cp /etc/openvpn/easy-rsa/pki/index.txt{,.bk}");
+    execSync(
+      "cp /etc/openvpn/easy-rsa/pki/index.txt /etc/openvpn/easy-rsa/pki/index.txt.bk"
+    );
 
     return res.json({ message: `Certificate for client ${client} revoked.` });
   } catch (error) {

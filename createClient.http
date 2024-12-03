@@ -1,0 +1,8 @@
+
+POST http://62.106.95.50:4000/ovpn/revokeClient HTTP/1.1
+content-type: application/json
+
+{
+    "clientName": "sample"
+}
+
