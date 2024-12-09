@@ -6,6 +6,17 @@ echo "Enter the port number for the Node.js application to listen on:"
 read PORT
 echo "using $PORT"
 
+# Ask for the API_PASSWORD
+read -s -p "Enter API_PASSWORD (no default, required): " API_PASSWORD
+echo
+if [ -z "$API_PASSWORD" ]; then
+  echo "API_PASSWORD cannot be empty."
+  exit 1
+fi
+
+export PORT=$PORT
+export API_PASSWORD=$API_PASSWORD
+
 # Update package list and install WireGuard, Node.js, and necessary dependencies
 echo "Installing required packages..."
 sudo apt update
@@ -44,9 +55,6 @@ cd wireguard-manager
 # Install npm dependencies
 echo "Installing Node.js dependencies..."
 npm install
-
-# Set the port as an environment variable
-export PORT=$PORT
 
 # Start the app using pm2
 echo "Starting the Node.js app with pm2..."

@@ -1,12 +1,13 @@
 const express = require("express");
 const apis = require("./api");
-const ovpn = require("./ovpn");
 const { sequelize } = require("./database");
 const { updateConfigFile } = require("./utils/config-file");
+const checkPassword = require("./middleware/checkPassword");
 
 async function bootstrap() {
   const app = express();
   app.use(express.json());
+  app.use(checkPassword);
 
   try {
     await sequelize.authenticate();
@@ -17,8 +18,7 @@ async function bootstrap() {
   }
 
   await updateConfigFile();
-  app.use("/api", apis);
-  app.use("/ovpn", ovpn);
+  app.use("/", apis);
 
   // Ensure the server starts listening
   app.listen(process.env.PORT || 3000, () => {

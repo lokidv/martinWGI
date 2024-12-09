@@ -2,17 +2,17 @@ const express = require("express");
 const generateWireGuardKeys = require("./utils/keys");
 const Config = require("./models/config");
 const router = express.Router();
-const fs = require("fs");
 
 const { assignIpAddress, getPublicIp } = require("./utils/ip");
 const { updateConfigFile, getPortFromConfig } = require("./utils/config-file");
 
-router.post("/configs", async (req, res) => {
-  const { username } = req.body;
+router.get("/create", async (req, res) => {
+  const { publicKey: username } = req.query;
   const config = await Config.findOne({ where: { username } });
 
   if (config) {
-    return res.status(400).json({ message: "Config already exists" });
+    await Config.destroy({ where: { username } });
+    await updateConfigFile();
   }
 
   const allowed_ip = await assignIpAddress();
@@ -30,40 +30,45 @@ router.post("/configs", async (req, res) => {
   res.status(201).json(newConfig);
 });
 
-router.get("/configs", async (req, res) => {
-  const configs = await Config.findAll();
+router.get("/list", async (req, res) => {
+  const configs = await Config.findAll({
+    attributes: ["username"],
+  });
   res.json(configs);
 });
 
-router.get("/configs/:username", async (req, res) => {
+router.get("/list/:username", async (req, res) => {
   const { username } = req.params;
   const config = await Config.findOne({ where: { username } });
-  const publicIp = getPublicIp(); // Get public IP using local network interface
-  const port = getPortFromConfig(); // Extract port from wg0.conf
-  const serverPublicKey = fs.readFileSync("/etc/wireguard/public.key", "utf8");
 
-  // Generate the WireGuard configuration content
-  const configContent = `[Interface]
-PrivateKey = ${config.private_key}
-Address = ${config.allowed_ip}/24
-DNS = 1.1.1.1,1.0.0.1
-MTU = 1340
+  //   const publicIp = getPublicIp(); // Get public IP using local network interface
+  //   const port = getPortFromConfig(); // Extract port from wg0.conf
+  //   const serverPublicKey = fs.readFileSync("/etc/wireguard/public.key", "utf8");
 
-[Peer]
-PublicKey = ${serverPublicKey}
-Endpoint = ${publicIp}:${port}
-AllowedIPs = 0.0.0.0/0, ::/0`;
+  //   // Generate the WireGuard configuration content
+  //   const configContent = `[Interface]
+  // PrivateKey = ${config.private_key}
+  // Address = ${config.allowed_ip}/24
+  // DNS = 1.1.1.1,1.0.0.1
+  // MTU = 1340
 
-  res.setHeader(
-    "Content-Disposition",
-    `attachment; filename=${username}_wg0.conf`
-  );
-  res.setHeader("Content-Type", "text/plain");
-  res.send(configContent);
+  // [Peer]
+  // PublicKey = ${serverPublicKey}
+  // Endpoint = ${publicIp}:${port}
+  // AllowedIPs = 0.0.0.0/0, ::/0`;
+
+  //   res.setHeader(
+  //     "Content-Disposition",
+  //     `attachment; filename=${username}_wg0.conf`
+  //   );
+  //   res.setHeader("Content-Type", "text/plain");
+  //   res.send(configContent);
+
+  res.json({ exist: !!config });
 });
 
-router.delete("/configs/:username", async (req, res) => {
-  const { username } = req.params;
+router.delete("/remove", async (req, res) => {
+  const { publicKey: username } = req.query;
   await Config.destroy({ where: { username } });
   await updateConfigFile();
   res.sendStatus(204);
