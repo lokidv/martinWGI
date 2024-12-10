@@ -39,7 +39,7 @@ Address = ${config.allowed_ip}/24
 DNS = 1.1.1.1,1.0.0.1
 
 [Peer]
-PublicKey = ${serverPublicKey}
+PublicKey = ${serverPublicKey.replaceAll("\n", "")}
 Endpoint = ${publicIp}:${port}
 AllowedIPs = 0.0.0.0/0, ::/0`;
 
