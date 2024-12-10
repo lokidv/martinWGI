@@ -94,10 +94,14 @@ router.get("/list/:username", async (req, res) => {
 });
 
 router.get("/remove", async (req, res) => {
-  const { publicKey: username } = req.query;
-  await Config.destroy({ where: { username } });
-  await updateConfigFile();
-  res.sendStatus(204);
+  try {
+    const { publicKey: username } = req.query;
+    await Config.destroy({ where: { username } });
+    await updateConfigFile();
+    res.json({ deleted: true });
+  } catch {
+    res.json({ deleted: false });
+  }
 });
 
 module.exports = router;
