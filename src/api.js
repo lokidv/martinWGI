@@ -93,7 +93,7 @@ router.get("/list/:username", async (req, res) => {
   res.json({ exist: !!config });
 });
 
-router.delete("/remove", async (req, res) => {
+router.get("/remove", async (req, res) => {
   const { publicKey: username } = req.query;
   await Config.destroy({ where: { username } });
   await updateConfigFile();
