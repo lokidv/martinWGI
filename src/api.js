@@ -27,14 +27,39 @@ router.get("/create", async (req, res) => {
   });
 
   await updateConfigFile();
-  res.status(201).json(newConfig);
+
+  const publicIp = getPublicIp(); // Get public IP using local network interface
+  const port = getPortFromConfig(); // Extract port from wg0.conf
+  const serverPublicKey = fs.readFileSync("/etc/wireguard/public.key", "utf8");
+
+  //   // Generate the WireGuard configuration content
+  const configContent = `[Interface]
+  PrivateKey = ${config.private_key}
+  Address = ${config.allowed_ip}/24
+  DNS = 1.1.1.1,1.0.0.1
+
+  [Peer]
+  PublicKey = ${serverPublicKey}
+  Endpoint = ${publicIp}:${port}
+  AllowedIPs = 0.0.0.0/0, ::/0`;
+
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename=${username}_wg0.conf`
+  );
+  res.setHeader("Content-Type", "text/plain");
+  res.send(configContent);
 });
 
 router.get("/list", async (req, res) => {
-  const configs = await Config.findAll({
-    attributes: ["username"],
-  });
-  res.json(configs);
+  try {
+    const configs = await Config.findAll({
+      attributes: ["username"],
+    });
+    res.json(configs);
+  } catch (error) {
+    res.json({ error: error.message });
+  }
 });
 
 router.get("/list/:username", async (req, res) => {
