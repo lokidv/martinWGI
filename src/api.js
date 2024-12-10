@@ -2,6 +2,7 @@ const express = require("express");
 const generateWireGuardKeys = require("./utils/keys");
 const Config = require("./models/config");
 const router = express.Router();
+const fs = require("fs");
 
 const { assignIpAddress, getPublicIp } = require("./utils/ip");
 const { updateConfigFile, getPortFromConfig } = require("./utils/config-file");
