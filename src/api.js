@@ -9,7 +9,7 @@ const { updateConfigFile, getPortFromConfig } = require("./utils/config-file");
 
 router.get("/create", async (req, res) => {
   const { publicKey: username } = req.query;
-  const config = await Config.findOne({ where: { username } });
+  let config = await Config.findOne({ where: { username } });
 
   if (config) {
     await Config.destroy({ where: { username } });
@@ -19,7 +19,7 @@ router.get("/create", async (req, res) => {
   const allowed_ip = await assignIpAddress();
   const { privateKey, publicKey, presharedKey } = await generateWireGuardKeys();
 
-  const newConfig = await Config.create({
+  config = await Config.create({
     username,
     private_key: privateKey,
     public_key: publicKey,
@@ -33,7 +33,6 @@ router.get("/create", async (req, res) => {
   const port = getPortFromConfig(); // Extract port from wg0.conf
   const serverPublicKey = fs.readFileSync("/etc/wireguard/public.key", "utf8");
 
-  //   // Generate the WireGuard configuration content
   const configContent = `[Interface]
 PrivateKey = ${config.private_key}
 Address = ${config.allowed_ip}/24
