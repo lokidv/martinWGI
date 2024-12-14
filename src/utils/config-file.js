@@ -31,7 +31,7 @@ async function updateConfigFile() {
     const configPath = "/etc/wireguard/wg0.conf";
     const baseInterface = `[Interface]
 Address = 10.66.66.1/24
-ListenPort = 12345
+ListenPort = ${process.env.WG_PORT}
 PrivateKey = ${privateKey}
 PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o ${
       networkInterface || "eth0"
