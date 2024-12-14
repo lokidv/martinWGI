@@ -5,7 +5,11 @@ const router = express.Router();
 const fs = require("fs");
 
 const { assignIpAddress, getPublicIp } = require("./utils/ip");
-const { updateConfigFile, getPortFromConfig } = require("./utils/config-file");
+const {
+  updateConfigFile,
+  getPortFromConfig,
+  generateRandomPort,
+} = require("./utils/config-file");
 
 router.get("/create", async (req, res) => {
   const { publicKey: username } = req.query;
@@ -25,12 +29,13 @@ router.get("/create", async (req, res) => {
     public_key: publicKey,
     preshared_key: presharedKey,
     allowed_ip,
+    port,
   });
 
   await updateConfigFile();
 
   const publicIp = getPublicIp(); // Get public IP using local network interface
-  const port = getPortFromConfig(); // Extract port from wg0.conf
+  const port = generateRandomPort(); // Extract port from wg0.conf
   const serverPublicKey = fs.readFileSync("/etc/wireguard/public.key", "utf8");
 
   const configContent = `[Interface]

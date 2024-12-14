@@ -35,6 +35,11 @@ const Config = sequelize.define(
       allowNull: false,
       unique: true,
     },
+    port: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      unique: true,
+    },
   },
   {
     timestamps: true,

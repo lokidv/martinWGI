@@ -3,6 +3,26 @@ const Config = require("../models/config");
 const { exec } = require("child_process");
 const { getNetworkInterface, getPublicIp } = require("./ip");
 
+async function generateRandomPort() {
+  const MIN_PORT = 49152;
+  const MAX_PORT = 65535;
+
+  let port;
+  let isDuplicate = true;
+
+  while (isDuplicate) {
+    port = Math.floor(Math.random() * (MAX_PORT - MIN_PORT + 1)) + MIN_PORT;
+
+    // Check if the port is already in use in the database
+    const existingConfig = await Config.findOne({ where: { port } });
+    if (!existingConfig) {
+      isDuplicate = false; // Port is unique
+    }
+  }
+
+  return port;
+}
+
 async function updateConfigFile() {
   try {
     const privateKey = fs.readFileSync("/etc/wireguard/private.key", "utf8");
@@ -28,7 +48,7 @@ PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACC
 [Peer]
 PublicKey = ${config.public_key}
 AllowedIPs = ${config.allowed_ip}
-Endpoint = ${ip}:12345`;
+Endpoint = 0.0.0.0:${config.port}`;
       newConfigs.push(newConfig);
       // await new Promise((resolve, reject) => {
       //   exec(
@@ -96,4 +116,4 @@ function getPortFromConfig() {
   }
 }
 
-module.exports = { updateConfigFile, getPortFromConfig };
+module.exports = { updateConfigFile, getPortFromConfig, generateRandomPort };
