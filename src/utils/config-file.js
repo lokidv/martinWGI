@@ -38,7 +38,7 @@ PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEP
     } -j MASQUERADE
 PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o ${
       networkInterface || "eth0"
-    } -j MASQUERADE`;
+    } -j MASQUERADE \n`;
 
     const configs = await Config.findAll();
 
