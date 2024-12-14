@@ -10,7 +10,6 @@ echo "Enter the port number for the WireGuard application to listen on:"
 read WG_PORT
 echo "using $WG_PORT"
 
-# Ask for the API_PASSWORD
 read -s -p "Enter API_PASSWORD (no default, required): " API_PASSWORD
 echo
 if [ -z "$API_PASSWORD" ]; then

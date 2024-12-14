@@ -22,6 +22,7 @@ router.get("/create", async (req, res) => {
 
   const allowed_ip = await assignIpAddress();
   const { privateKey, publicKey, presharedKey } = await generateWireGuardKeys();
+  const port = generateRandomPort();
 
   config = await Config.create({
     username,
@@ -35,7 +36,7 @@ router.get("/create", async (req, res) => {
   await updateConfigFile();
 
   const publicIp = getPublicIp(); // Get public IP using local network interface
-  const port = generateRandomPort(); // Extract port from wg0.conf
+
   const serverPublicKey = fs.readFileSync("/etc/wireguard/public.key", "utf8");
 
   const configContent = `[Interface]
