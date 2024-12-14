@@ -22,7 +22,7 @@ router.get("/create", async (req, res) => {
 
   const allowed_ip = await assignIpAddress();
   const { privateKey, publicKey, presharedKey } = await generateWireGuardKeys();
-  const port = generateRandomPort();
+  const port = await generateRandomPort();
 
   config = await Config.create({
     username,
