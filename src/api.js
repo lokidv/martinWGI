@@ -47,7 +47,7 @@ DNS = 1.1.1.1,1.0.0.1
 [Peer]
 PublicKey = ${serverPublicKey.replaceAll("\n", "")}
 Endpoint = ${publicIp}:${process.env.WG_PORT}
-AllowedIPs = 0.0.0.0/0, ::/0`;
+AllowedIPs = 0.0.0.0/0`;
 
   res.setHeader(
     "Content-Disposition",
