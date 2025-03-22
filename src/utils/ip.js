@@ -47,14 +47,24 @@ async function assignIpAddress() {
     return lastOctet;
   });
 
-  // Find the lowest available IP in the range
-  for (let i = 2; i <= 254; i++) {
+  // Find all available IPs in the range
+  const availableIps = [];
+  for (let i = 2; i <= 250; i++) {
     if (!assignedIps.includes(i)) {
-      return `10.66.66.${i}`;
+      availableIps.push(i);
     }
   }
 
-  throw new Error("No available IP addresses in the range.");
+  // Check if there are any available IPs
+  if (availableIps.length === 0) {
+    throw new Error("No available IP addresses in the range.");
+  }
+
+  // Randomly select one of the available IPs
+  const randomIndex = Math.floor(Math.random() * availableIps.length);
+  const selectedIp = availableIps[randomIndex];
+
+  return `10.66.66.${selectedIp}`;
 }
 
 function getPublicIp() {
